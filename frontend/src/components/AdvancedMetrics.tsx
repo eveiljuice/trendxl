@@ -6,7 +6,6 @@ import {
   Users,
   Heart,
   MessageCircle,
-  Share2,
   Calendar,
   Clock,
   Target,
@@ -167,7 +166,6 @@ const AdvancedMetrics: React.FC<AdvancedMetricsProps> = ({
 
   // Niche-specific insights
   const getNicheInsights = (): string[] => {
-    const niche = analysis.niche.toLowerCase();
     const insights: string[] = [];
 
     if (metrics.avgTrendEngagement > 0.08) {

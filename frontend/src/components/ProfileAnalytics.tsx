@@ -165,7 +165,7 @@ const ProfileAnalytics: React.FC<ProfileAnalyticsProps> = ({
     if (profile.username) {
       loadAnalytics();
     }
-  }, [profile.username]);
+  }, [profile.username, loadAnalytics]);
 
   // Get analytics status
   const getAnalyticsStatus = () => {

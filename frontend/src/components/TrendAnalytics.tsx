@@ -7,15 +7,13 @@ import {
   Eye,
   Heart,
   MessageCircle,
-  Share2,
   Calendar,
-  Clock,
   Zap,
   Target,
   Users
 } from 'lucide-react';
 import { TrendItem } from '../types';
-import { formatNumber, getRelativeTime } from '../lib/api';
+import { formatNumber } from '../lib/api';
 import SectionTitle from './ui/SectionTitle';
 import Badge from './ui/Badge';
 

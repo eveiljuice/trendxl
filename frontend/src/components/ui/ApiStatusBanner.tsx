@@ -1,6 +1,6 @@
 import React from 'react';
 import { clsx } from 'clsx';
-import { Database, Zap, Layers, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Database, Layers, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface ApiStatusBannerProps {
   status: 'ensemble' | 'database' | 'mock';

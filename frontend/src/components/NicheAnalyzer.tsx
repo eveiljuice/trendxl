@@ -1,18 +1,15 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Target,
   TrendingUp,
   Hash,
   Users,
-  Zap,
   Star,
   BarChart3,
   Lightbulb,
   PlayCircle,
   Clock,
   Heart,
-  MessageCircle,
-  Share2,
   Eye,
   Award,
   ArrowRight,
@@ -169,7 +166,7 @@ const NicheAnalyzer: React.FC<NicheAnalyzerProps> = ({
   }, [analysis, trends]);
 
   // Generate detailed keyword analysis
-  const generateKeywordAnalysis = (keyword: string): KeywordAnalysis => {
+  const generateKeywordAnalysis = useCallback((keyword: string): KeywordAnalysis => {
     const relatedTrends = trends.filter(trend => 
       trend.desc.toLowerCase().includes(keyword.toLowerCase()) ||
       trend.text_extra?.some(item => 
@@ -196,7 +193,7 @@ const NicheAnalyzer: React.FC<NicheAnalyzerProps> = ({
       search_volume: Math.floor(avgViews * 0.1),
       engagement_correlation: avgEngagement,
       seasonal_trends: [], // Would be populated from API
-      related_hashtags: relatedTrends.flatMap(trend => 
+      related_hashtags: relatedTrends.flatMap(trend =>
         trend.text_extra?.map(item => item.hashtag_name).filter((name): name is string => Boolean(name)) || []
       ).slice(0, 5),
       success_examples: relatedTrends.slice(0, 3).map(trend => ({
@@ -206,10 +203,10 @@ const NicheAnalyzer: React.FC<NicheAnalyzerProps> = ({
         engagement_rate: trend.engagement_rate
       }))
     };
-  };
+  }, [trends]);
 
   // Generate video idea recommendations
-  const generateVideoRecommendations = (): VideoIdeaRecommendation[] => {
+  const generateVideoRecommendations = useCallback((): VideoIdeaRecommendation[] => {
     if (!analyzeNiche || !analysis) return [];
 
     const recommendations: VideoIdeaRecommendation[] = [];
@@ -308,7 +305,7 @@ const NicheAnalyzer: React.FC<NicheAnalyzerProps> = ({
     });
 
     return recommendations.sort((a, b) => b.success_probability - a.success_probability);
-  };
+  }, [analyzeNiche, analysis, profile]);
 
   // Load comprehensive analysis
   useEffect(() => {
@@ -368,7 +365,7 @@ const NicheAnalyzer: React.FC<NicheAnalyzerProps> = ({
 
       setLoading(false);
     }
-  }, [analysis, trends]);
+  }, [analysis, trends, generateKeywordAnalysis, generateVideoRecommendations]);
 
   const toggleSection = (section: string) => {
     setExpandedSections(prev => ({

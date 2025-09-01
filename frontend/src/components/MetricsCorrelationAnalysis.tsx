@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import {
   Activity,
   TrendingUp,
-  Users,
   Heart,
   MessageCircle,
   Share2,

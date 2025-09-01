@@ -11,9 +11,6 @@ import {
   RefreshTrendsRequest,
   HealthStatus,
   APIError,
-  UserProfile,
-  ProfileAnalysis,
-  TrendItem,
   ServerErrorData
 } from '../types';
 

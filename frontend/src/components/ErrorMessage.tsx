@@ -74,11 +74,19 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
     }
     
     if (errorMessage.includes('Network error')) {
+      const isNetlify = typeof window !== 'undefined' && window.location.hostname.includes('netlify');
       return {
         type: 'network',
-        title: 'Connection Issue',
-        description: 'Cannot connect to the server.',
-        suggestions: [
+        title: isNetlify ? 'Backend API Unavailable' : 'Connection Issue',
+        description: isNetlify
+          ? '🚀 TrendXL deployed on Netlify. Backend API is not available. For full functionality, run locally with Docker.'
+          : 'Cannot connect to the server.',
+        suggestions: isNetlify ? [
+          'Clone the repository locally',
+          'Run with Docker: docker-compose up --build',
+          'Access at http://localhost:3000',
+          'Full functionality requires backend API'
+        ] : [
           'Check your internet connection',
           'Make sure the server is running',
           'Try refreshing the page'
