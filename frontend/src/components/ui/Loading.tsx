@@ -29,7 +29,7 @@ const Loading: React.FC<LoadingProps> = ({
   };
 
   const spinner = (
-    <div className={clsx('loading-spinner', sizeClasses[size])} />
+    <div className={clsx('loading-spinner mx-auto', sizeClasses[size])} />
   );
 
   const formatTime = (seconds: number) => {
@@ -39,12 +39,14 @@ const Loading: React.FC<LoadingProps> = ({
   };
 
   const content = (
-    <div className="flex flex-col items-center gap-6">
+    <div className="flex flex-col items-center justify-center gap-6">
       {/* Main Spinner and Status */}
-      <div className="text-center">
-        {spinner}
+      <div className="flex flex-col items-center justify-center text-center">
+        <div className="flex items-center justify-center mb-3">
+          {spinner}
+        </div>
         {text && (
-          <p className="text-dark-400 text-sm animate-pulse mt-3">{text}</p>
+          <p className="text-dark-400 text-sm animate-pulse">{text}</p>
         )}
       </div>
       

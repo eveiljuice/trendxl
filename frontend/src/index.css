@@ -62,7 +62,7 @@
   }
 
   .loading-spinner {
-    @apply animate-spin rounded-full border-2 border-dark-700 border-t-primary-500;
+    @apply animate-spin rounded-full border-2 border-dark-700 border-t-primary-500 flex-shrink-0;
   }
 
   .gradient-text {
