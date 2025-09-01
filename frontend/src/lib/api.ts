@@ -21,8 +21,16 @@ class APIClient {
   private client: AxiosInstance;
 
   constructor(baseURL: string = '/api/v1') {
+    // Allow overriding API origin in production via REACT_APP_API_ORIGIN
+    // Examples:
+    //   REACT_APP_API_ORIGIN=https://api.example.com -> base becomes https://api.example.com/api/v1
+    //   REACT_APP_API_ORIGIN=/api -> base becomes /api/v1 (behind reverse proxy)
+    const origin = (process.env.REACT_APP_API_ORIGIN || '').trim();
+    const resolvedBase = origin
+      ? `${origin.replace(/\/$/, '')}${baseURL.startsWith('/') ? '' : '/'}${baseURL.replace(/^\//, '')}`
+      : baseURL;
     this.client = axios.create({
-      baseURL,
+      baseURL: resolvedBase,
       timeout: 60000, // 60 seconds for long-running operations
       headers: {
         'Content-Type': 'application/json',
