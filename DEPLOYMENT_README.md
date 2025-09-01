@@ -112,6 +112,46 @@ cd backend
 uvicorn main:app --host 0.0.0.0 --port 8000
 ```
 
+### Netlify (Frontend-only)
+
+If you deploy only the React frontend to Netlify and run the FastAPI backend elsewhere (e.g., Render, Fly.io, VPS), configure Netlify as follows:
+
+1) Add `netlify.toml` to repo root:
+
+```toml
+[build]
+  base = "frontend"
+  command = "npm run build"
+  publish = "build"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+```
+
+2) Configure API base URL:
+
+- Option A (Netlify redirects): add a production proxy to your backend URL:
+
+```toml
+# netlify.toml
+[[redirects]]
+  from = "/api/*"
+  to = "https://YOUR_BACKEND_URL/:splat"
+  status = 200
+  force = true
+```
+
+- Option B (environment variable): set `REACT_APP_API_BASE` in Netlify UI and use it in the app to override `/api/v1`.
+
+3) Backend CORS must allow your Netlify domain. In `backend/main.py`, extend `allow_origins` to include your Netlify site URL.
+
+Common Netlify issues:
+- Wrong publish dir: should be `build` when `base = "frontend"`.
+- Missing SPA redirect: add the catch-all redirect to `/index.html`.
+- Proxying to localhost in production: replace with real backend URL or omit.
+
 ## 🔍 Monitoring & Health Checks
 
 ### Health Endpoints
