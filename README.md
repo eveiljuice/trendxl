@@ -38,17 +38,27 @@ TrendXL is an advanced AI-powered platform for analyzing TikTok trends using the
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### Option 1: Railway Deploy (Recommended)
 
-- Python 3.8+ (recommended 3.12)
+**Fastest way - deploy in 2 minutes:**
+
+1. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
+2. Select this repository
+3. Add environment variables (see `RAILWAY_DEPLOY.md`)
+4. Done! Get your live URL
+
+### Option 2: Local Development
+
+**Prerequisites:**
+
+- Python 3.8+ (recommended 3.11)
 - Node.js 18+
-- Docker (optional)
 
 ### 1. Environment Setup
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/trendxl.git
+git clone https://github.com/eveiljuice/trendxl.git
 cd trendxl
 
 # Create environment file
@@ -162,17 +172,38 @@ cd frontend && npm test
 
 ## 🚀 Deployment
 
-### Docker Production
+### Railway (Recommended)
+
+**Production deployment in 2 minutes:**
+
+1. Fork this repository
+2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
+3. Select your fork
+4. Add environment variables:
+   - `ENSEMBLE_DATA_API_KEY` - your Ensemble API key
+   - `OPENAI_API_KEY` - your OpenAI API key
+   - `USE_SQLITE=true` - use SQLite database
+5. Railway automatically builds and deploys! 🎉
+
+**Features:**
+
+- ✅ Auto-builds frontend (React + TypeScript)
+- ✅ Installs Python dependencies
+- ✅ Serves full-stack app on one URL
+- ✅ Free tier includes $5/month credit
+- ✅ Custom domains, SSL, auto-scaling
+
+### Docker (Alternative)
 
 ```bash
-docker-compose -f docker-compose.prod.yml up -d
+docker-compose up --build
 ```
 
 ### Manual Deployment
 
 1. Set `DEBUG=false` in `.env`
 2. Build frontend: `cd frontend && npm run build`
-3. Run backend: `python run.py`
+3. Run backend: `python backend/main.py`
 
 ## 🤝 Contributing
 

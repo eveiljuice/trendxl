@@ -59,10 +59,16 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS middleware
+# CORS middleware - Production ready
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://*.railway.app",
+        "https://trendxl.railway.app",
+        os.getenv("FRONTEND_URL", "*")
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -77,10 +83,28 @@ app.include_router(
     analytics_router, prefix="/api/v1/analytics", tags=["analytics"])
 app.include_router(debug_router, prefix="/api/debug", tags=["debug"])
 
-# Serve static files (React build)
-if os.path.exists("frontend/build"):
-    app.mount("/", StaticFiles(directory="frontend/build",
-              html=True), name="static")
+# Serve static files (React build) in production
+build_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
+if os.path.exists(build_dir):
+    app.mount(
+        "/static", StaticFiles(directory=os.path.join(build_dir, "static")), name="static")
+
+    # Serve React app on all routes (SPA)
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        from fastapi.responses import FileResponse
+
+        # Don't serve frontend for API routes
+        if full_path.startswith("api/"):
+            raise HTTPException(
+                status_code=404, detail="API endpoint not found")
+
+        # Serve index.html for all frontend routes
+        index_file = os.path.join(build_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        else:
+            raise HTTPException(status_code=404, detail="Frontend not built")
 
 
 @app.get("/api/health")

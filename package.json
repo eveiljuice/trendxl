@@ -1,5 +1,25 @@
 {
-  "dependencies": {
-    "recharts": "^3.1.2"
-  }
+  "name": "trendxl",
+  "version": "1.0.0",
+  "description": "TrendXL - AI-powered TikTok trend analysis platform",
+  "main": "backend/main.py",
+  "scripts": {
+    "build": "cd frontend && npm install && npm run build",
+    "start": "python backend/main.py",
+    "dev": "python backend/main.py",
+    "install-frontend": "cd frontend && npm install",
+    "build-frontend": "cd frontend && npm run build"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "python": ">=3.8.0"
+  },
+  "keywords": [
+    "tiktok",
+    "trends",
+    "ai",
+    "analytics"
+  ],
+  "author": "TrendXL Team",
+  "license": "MIT"
 }

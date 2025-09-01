@@ -1,0 +1,25 @@
+[build]
+builder = "nixpacks"
+
+[deploy]
+startCommand = "python backend/main.py"
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[[services]]
+name = "trendxl"
+source = { type = "github" }
+
+[services.variables]
+NODE_VERSION = "18"
+PYTHON_VERSION = "3.11"
+PORT = { default = "8000" }
+HOST = { default = "0.0.0.0" }
+
+[[services.tcpProxies]]
+applicationPort = 8000
+externalPort = 80
+
+[[services.tcpProxies]]
+applicationPort = 8000  
+externalPort = 443

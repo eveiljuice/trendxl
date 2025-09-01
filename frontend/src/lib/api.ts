@@ -17,7 +17,7 @@ import {
 class APIClient {
   private client: AxiosInstance;
 
-  constructor(baseURL: string = '/api/v1') {
+  constructor(baseURL: string = process.env.REACT_APP_API_URL || '/api/v1') {
     this.client = axios.create({
       baseURL,
       timeout: 60000, // 60 seconds for long-running operations
@@ -107,8 +107,11 @@ class APIClient {
    */
   async healthCheck(): Promise<HealthStatus> {
     try {
-      // Health endpoint is at /api/health, not /api/v1/health
-      const response = await axios.get<HealthStatus>('/api/health');
+      // Use environment-aware URL for health check
+      const healthUrl = process.env.REACT_APP_API_URL 
+        ? `${process.env.REACT_APP_API_URL.replace('/api/v1', '')}/api/health`
+        : '/api/health';
+      const response = await axios.get<HealthStatus>(healthUrl);
       return response.data;
     } catch (error) {
       throw error;
