@@ -77,37 +77,7 @@ app.add_middleware(
 
 # Initialize services will be done lazily to avoid startup errors
 
-# Include routers
-app.include_router(analysis_router, prefix="/api/v1", tags=["analysis"])
-app.include_router(trends_router, prefix="/api/v1", tags=["trends"])
-app.include_router(
-    analytics_router, prefix="/api/v1/analytics", tags=["analytics"])
-app.include_router(debug_router, prefix="/api/debug", tags=["debug"])
-
-# Serve static files (React build) in production
-build_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
-if os.path.exists(build_dir):
-    app.mount(
-        "/static", StaticFiles(directory=os.path.join(build_dir, "static")), name="static")
-
-    # Serve React app on all routes (SPA)
-    @app.get("/{full_path:path}")
-    async def serve_frontend(full_path: str):
-        from fastapi.responses import FileResponse
-
-        # Don't serve frontend for API routes
-        if full_path.startswith("api/"):
-            raise HTTPException(
-                status_code=404, detail="API endpoint not found")
-
-        # Serve index.html for all frontend routes
-        index_file = os.path.join(build_dir, "index.html")
-        if os.path.exists(index_file):
-            return FileResponse(index_file)
-        else:
-            raise HTTPException(status_code=404, detail="Frontend not built")
-
-
+# API Routes - MUST BE BEFORE catch-all static routes
 @app.get("/api/health")
 async def health_check():
     """Enhanced health check endpoint with environment variables diagnostics"""
@@ -255,6 +225,37 @@ async def debug_environment():
             for var in ["ENSEMBLE_DATA_API_KEY", "OPENAI_API_KEY", "USE_SQLITE", "DEBUG", "PORT", "HOST"]
         }
     }
+
+
+# Include API routers BEFORE static file handling
+app.include_router(analysis_router, prefix="/api/v1", tags=["analysis"])
+app.include_router(trends_router, prefix="/api/v1", tags=["trends"])
+app.include_router(
+    analytics_router, prefix="/api/v1/analytics", tags=["analytics"])
+app.include_router(debug_router, prefix="/api/debug", tags=["debug"])
+
+# Serve static files (React build) in production - MUST BE LAST
+build_dir = os.path.join(os.path.dirname(__file__), "..", "frontend", "build")
+if os.path.exists(build_dir):
+    app.mount(
+        "/static", StaticFiles(directory=os.path.join(build_dir, "static")), name="static")
+
+    # Serve React app on all routes (SPA) - catch-all route
+    @app.get("/{full_path:path}")
+    async def serve_frontend(full_path: str):
+        from fastapi.responses import FileResponse
+
+        # Don't serve frontend for API routes (should not happen now)
+        if full_path.startswith("api/"):
+            raise HTTPException(
+                status_code=404, detail="API endpoint not found")
+
+        # Serve index.html for all frontend routes
+        index_file = os.path.join(build_dir, "index.html")
+        if os.path.exists(index_file):
+            return FileResponse(index_file)
+        else:
+            raise HTTPException(status_code=404, detail="Frontend not built")
 
 if __name__ == "__main__":
     import uvicorn
