@@ -18,9 +18,31 @@ class EnsembleService:
     def __init__(self):
         api_key = os.getenv("ENSEMBLE_DATA_API_KEY")
         if not api_key:
-            raise ValueError(
-                "ENSEMBLE_DATA_API_KEY environment variable is required")
+            # Enhanced error message for Railway deployment
+            import sys
+            error_msg = (
+                "ENSEMBLE_DATA_API_KEY environment variable is required.\n"
+                "🚨 Railway Deployment Issue:\n"
+                "1. Go to Railway Dashboard → Your Project\n"
+                "2. Click 'Variables' tab\n"
+                "3. Add: ENSEMBLE_DATA_API_KEY = your_ensemble_api_key_here\n"
+                "4. Redeploy the application\n\n"
+                f"Available environment variables: {list(os.environ.keys())}"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+            
+        # Validate API key format
+        if len(api_key) < 10:
+            error_msg = (
+                f"Invalid ENSEMBLE_DATA_API_KEY format. "
+                f"Key should be longer than 10 characters, got: {len(api_key)} characters"
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+            
         self.client = EDClient(api_key)
+        logger.info(f"✅ EnsembleService initialized with API key: {api_key[:8]}...")
 
     def is_healthy(self) -> bool:
         """Check if the service is healthy"""

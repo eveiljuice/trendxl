@@ -5,6 +5,7 @@ Main FastAPI application entry point
 
 import sys
 import os
+import time
 from pathlib import Path
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -109,10 +110,30 @@ if os.path.exists(build_dir):
 
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint"""
+    """Enhanced health check endpoint with environment variables diagnostics"""
     services_status = {}
     overall_status = "healthy"
     errors = []
+    env_diagnostics = {}
+
+    # Check environment variables first
+    required_env_vars = {
+        "ENSEMBLE_DATA_API_KEY": "EnsembleData API Key for TikTok data",
+        "OPENAI_API_KEY": "OpenAI API Key for AI analysis",
+        "USE_SQLITE": "Database mode selector"
+    }
+    
+    for env_var, description in required_env_vars.items():
+        value = os.getenv(env_var)
+        env_diagnostics[env_var] = {
+            "configured": bool(value),
+            "description": description,
+            "value_preview": f"{value[:8]}..." if value and len(value) > 8 else "Not set"
+        }
+        
+        if not value and env_var in ["ENSEMBLE_DATA_API_KEY", "OPENAI_API_KEY"]:
+            errors.append(f"❌ Missing {env_var}: {description}")
+            overall_status = "unhealthy"
 
     # Test each service individually to provide detailed error information
     try:
@@ -143,14 +164,97 @@ async def health_check():
 
     response = {
         "status": overall_status,
-        "services": services_status
+        "services": services_status,
+        "environment": env_diagnostics,
+        "deployment_platform": "Railway" if os.getenv("RAILWAY_ENVIRONMENT") else "Local/Other",
+        "timestamp": int(time.time())
     }
 
     if errors:
         response["errors"] = errors
-        response["message"] = "Some services are not configured properly. Check the errors for details."
+        response["message"] = "Configuration issues detected. Check errors and environment variables."
+        
+        # Railway-specific help
+        if os.getenv("RAILWAY_ENVIRONMENT"):
+            response["railway_help"] = {
+                "dashboard_url": "https://railway.app/dashboard",
+                "steps": [
+                    "1. Go to Railway Dashboard",
+                    "2. Select your TrendXL project",
+                    "3. Click 'Variables' tab",
+                    "4. Add missing environment variables",
+                    "5. Redeploy by clicking 'Deploy' or push to GitHub"
+                ]
+            }
 
     return response
+
+
+@app.get("/api/debug/environment")
+async def debug_environment():
+    """Debug endpoint to check all environment variables (Railway deployment help)"""
+    return {
+        "platform_detection": {
+            "is_railway": bool(os.getenv("RAILWAY_ENVIRONMENT")),
+            "is_local": not bool(os.getenv("RAILWAY_ENVIRONMENT")),
+            "railway_project_id": os.getenv("RAILWAY_PROJECT_ID", "Not detected"),
+            "railway_service_id": os.getenv("RAILWAY_SERVICE_ID", "Not detected")
+        },
+        "required_variables": {
+            "ENSEMBLE_DATA_API_KEY": {
+                "configured": bool(os.getenv("ENSEMBLE_DATA_API_KEY")),
+                "description": "EnsembleData API key for TikTok data access",
+                "example": "your_ensemble_api_key_here",
+                "priority": "CRITICAL"
+            },
+            "OPENAI_API_KEY": {
+                "configured": bool(os.getenv("OPENAI_API_KEY")),
+                "description": "OpenAI API key for AI analysis",
+                "example": "sk-...",
+                "priority": "CRITICAL"
+            },
+            "USE_SQLITE": {
+                "configured": bool(os.getenv("USE_SQLITE")),
+                "current_value": os.getenv("USE_SQLITE", "Not set"),
+                "description": "Database mode (set to 'true' for Railway)",
+                "example": "true",
+                "priority": "RECOMMENDED"
+            }
+        },
+        "railway_setup_guide": {
+            "step_1": "Go to https://railway.app/dashboard",
+            "step_2": "Find your TrendXL project",
+            "step_3": "Click on 'Variables' tab",
+            "step_4": "Add these variables:",
+            "variables_to_add": [
+                {
+                    "name": "ENSEMBLE_DATA_API_KEY", 
+                    "value": "your_ensemble_api_key_here",
+                    "note": "Replace with your actual Ensemble API key"
+                },
+                {
+                    "name": "OPENAI_API_KEY", 
+                    "value": "your_openai_api_key_here", 
+                    "note": "Replace with your actual OpenAI API key (sk-...)"
+                },
+                {
+                    "name": "USE_SQLITE", 
+                    "value": "true", 
+                    "note": "Required for Railway deployment"
+                },
+                {
+                    "name": "DEBUG", 
+                    "value": "false", 
+                    "note": "Set to false for production"
+                }
+            ],
+            "step_5": "Click 'Deploy' button or push changes to GitHub to trigger redeploy"
+        },
+        "current_environment_sample": {
+            var: "SET" if os.getenv(var) else "NOT SET" 
+            for var in ["ENSEMBLE_DATA_API_KEY", "OPENAI_API_KEY", "USE_SQLITE", "DEBUG", "PORT", "HOST"]
+        }
+    }
 
 if __name__ == "__main__":
     import uvicorn
