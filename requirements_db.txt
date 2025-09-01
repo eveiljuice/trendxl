@@ -1,0 +1,9 @@
+# TrendXL Database Setup Requirements
+# Install with: pip install -r requirements_db.txt
+
+mysql-connector-python>=8.0.0
+python-dotenv>=1.0.0
+
+# Optional but recommended for data processing
+pandas>=1.5.0
+numpy>=1.21.0
